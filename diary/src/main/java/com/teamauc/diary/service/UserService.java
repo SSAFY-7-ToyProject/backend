@@ -72,9 +72,9 @@ public class UserService {
     }
 
     @Transactional
-    public void delete(String email) {
+    public void delete(String uid) {
 
-        userRepository.delete(email);
+        userRepository.delete(uid);
     }
 
 

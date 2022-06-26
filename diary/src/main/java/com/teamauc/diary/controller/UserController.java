@@ -33,18 +33,18 @@ public class UserController {
         return new RegistUserResponseDto(email);
     }
 
-    @PutMapping("/{email}")
-    public UpdateUserResponseDto updateUser(@PathVariable("email")String email, @RequestBody UpdateUserRequestDto request){
+    @PutMapping("/{uid}")
+    public UpdateUserResponseDto updateUser(@PathVariable("uid")String uid, @RequestBody UpdateUserRequestDto request){
 
         userService.update(email,request.getName(),request.getBirth(),request.getGender(), request.getPhoneNumber());
 
         return new UpdateUserResponseDto(email);
     }
 
-    @DeleteMapping("/{email}")
-    public DeleteUserResponseDto deleteUser(@PathVariable("email") String email){
+    @DeleteMapping("/{uid}")
+    public DeleteUserResponseDto deleteUser(@PathVariable("uid") String uid){
 
-        userService.delete(email);
+        userService.delete(uid);
         return new DeleteUserResponseDto("회원 탈퇴가 완료되었습니다.");
 
     }

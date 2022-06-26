@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Entity
@@ -25,6 +26,7 @@ public class Reply {
     @ManyToOne (fetch = FetchType.LAZY)
     @JoinColumn (name = "user_email")
     @Setter (AccessLevel.NONE)
+    @NotNull (message = "존재하지 않는 사용자 입니다")
     private User user;
 
     @Setter (AccessLevel.NONE)

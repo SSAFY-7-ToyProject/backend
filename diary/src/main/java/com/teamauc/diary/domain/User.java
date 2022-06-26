@@ -1,12 +1,15 @@
 package com.teamauc.diary.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.teamauc.diary.util.SHA256;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.UniqueElements;
 
 
 import javax.persistence.*;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,7 +20,10 @@ import java.util.List;
 public class User {
 
     @Id
-    @Column (name = "user_email")
+    @Setter (AccessLevel.NONE)
+    private String uid;
+
+    @Column (name = "user_email", unique = true)
     @Setter (AccessLevel.NONE)
     private String email;
 
@@ -35,7 +41,7 @@ public class User {
     @Column (name = "phone_number")
     private String phoneNumber;
 
-    @OneToMany(mappedBy = "user") // Test 할 것 "" 안의 value가 의미하는 것?
+    @OneToMany(mappedBy = "user")
     @JsonIgnore
     private List<Diary> diaries = new ArrayList<>();
 
@@ -48,6 +54,13 @@ public class User {
 
         User user = new User();
 
+        SHA256 sha256 = new SHA256();
+
+        try {
+            user.uid = sha256.encrypt(email);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
         user.email = email;
         user.password = password;
         user.name = name;

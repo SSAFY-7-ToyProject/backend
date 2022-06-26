@@ -16,20 +16,26 @@ public class UserRepository { // ->필요한 기능이 무엇이 있을까? Crea
 
      em.persist(user);
 
-     return user.getEmail();
+     return user.getUid();
  }
 
 
 
- public User findByEmail (String email) {                   // 회원가입시 아이디 존재 or email찾기
+ public User findByEmail (String email) {
 
      return em.find(User.class,email);
 
  }
 
- public void delete (String email) {
+    public User findById (String uid) {
 
-     em.remove(findByEmail(email));
+        return em.find(User.class,uid);
+
+    }
+
+ public void delete (String uid) {
+
+     em.remove(findById(uid));
 
  }
 

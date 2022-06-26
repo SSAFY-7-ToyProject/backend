@@ -6,6 +6,7 @@ import lombok.Setter;
 
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ public class Diary {
         @JoinColumn (name = "user_email")
         @ManyToOne (fetch= FetchType.LAZY)
         @Setter (AccessLevel.NONE)
+        @NotNull (message = "존재하지 않는 사용자 입니다")
         private User user;
 
         @Setter (AccessLevel.NONE)
