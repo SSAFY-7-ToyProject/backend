@@ -28,17 +28,17 @@ public class UserController {
 
         User user = User.createUser(request.email,request.password,request.name,request.birth,request.gender,request.phoneNumber);
 
-        String email = userService.regist(user);
+        String uid = userService.regist(user);
 
-        return new RegistUserResponseDto(email);
+        return new RegistUserResponseDto(uid);
     }
 
     @PutMapping("/{uid}")
     public UpdateUserResponseDto updateUser(@PathVariable("uid")String uid, @RequestBody UpdateUserRequestDto request){
 
-        userService.update(email,request.getName(),request.getBirth(),request.getGender(), request.getPhoneNumber());
+        userService.update(uid,request.getName(),request.getBirth(),request.getGender(), request.getPhoneNumber());
 
-        return new UpdateUserResponseDto(email);
+        return new UpdateUserResponseDto(uid);
     }
 
     @DeleteMapping("/{uid}")
@@ -79,7 +79,7 @@ public class UserController {
     @AllArgsConstructor
     static class RegistUserResponseDto {
 
-        private String email;
+        private String uid;
     }
 
     @Data
@@ -96,7 +96,7 @@ public class UserController {
     @AllArgsConstructor
     static class UpdateUserResponseDto {
 
-        private String email;
+        private String uid;
     }
 
     @Data

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -22,6 +23,12 @@ public class DiaryService {
     public List<Diary> findByUserEmail (String email) {
 
         List<Diary> diaryList = diaryRepository.findByUserEmail(email);
+
+        return diaryList;
+    }
+
+    public  List<Diary>  findByUserId(String uid) {
+        List<Diary> diaryList = diaryRepository.findByUserId(uid);
 
         return diaryList;
     }
@@ -65,5 +72,6 @@ public class DiaryService {
         diaryRepository.delete(id);
 
     }
+
 
 }

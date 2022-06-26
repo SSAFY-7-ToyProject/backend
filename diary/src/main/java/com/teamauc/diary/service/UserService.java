@@ -40,14 +40,18 @@ public class UserService {
 
     }
 
+    public User SearchUserById(String uid) {
+        return userRepository.findById(uid);
+    }
+
     public boolean checkEmailDuplicated(String email){           //중복 테스트
         return userRepository.findByEmail(email) != null;
     }
 
     @Transactional
-    public void update(String email, String name, Birth birth, Gender gender,String phonenumber) {
+    public void update(String uid, String name, Birth birth, Gender gender,String phonenumber) {
 
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findById(uid);
 
         if( user == null ){
             throw new InvalidApproachException("등록되지 않은 사용자입니다.");
@@ -68,7 +72,7 @@ public class UserService {
 
         userRepository.regist(user);
 
-        return user.getEmail();
+        return user.getUid();
     }
 
     @Transactional

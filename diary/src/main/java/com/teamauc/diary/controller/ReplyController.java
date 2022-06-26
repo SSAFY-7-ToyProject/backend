@@ -32,7 +32,7 @@ public class ReplyController {
     public CreateReplyResponseDto createReply (@RequestBody CreateReplyRequestDto request) {
 
         Diary diary = diaryService.findByDiaryId(request.getDiaryId());
-        User user = userService.SearchUserByEmail(request.getEmail());
+        User user = userService.SearchUserById(request.getUid());
 
         Reply reply = Reply.createReply(diary,user,LocalDateTime.now(),request.isSecret(), request.getContent());
 
@@ -42,16 +42,12 @@ public class ReplyController {
 
     }
 
-    @GetMapping("/user/{email}")
-    public ResultDto readReplyByEmail (@PathVariable ("email") String email){
+    @GetMapping("/user/{uid}")
+    public ResultDto readReplyByUserId (@PathVariable ("uid") String uid){
 
-        List<ReadReplyResponseDto> replies = replyService.findByUserEmail(email)
+        List<ReadReplyResponseDto> replies = replyService.findByUserId(uid)
                 .stream()
-                .map(reply -> new ReadReplyResponseDto(reply.getId(),
-                        reply.getDiary().getId(),
-                        reply.getUser().getEmail(),
-                        reply.isSecret(),
-                        reply.getContent()))
+                .map(reply -> new ReadReplyResponseDto(reply))
                 .collect(Collectors.toList());
 
         return new ResultDto(replies);
@@ -63,11 +59,7 @@ public class ReplyController {
 
         List<ReadReplyResponseDto> replies = replyService.findByDiaryId(id)
                 .stream()
-                .map(reply -> new ReadReplyResponseDto(reply.getId(),
-                        reply.getDiary().getId(),
-                        reply.getUser().getEmail(),
-                        reply.isSecret(),
-                        reply.getContent()))
+                .map(reply -> new ReadReplyResponseDto(reply))
                 .collect(Collectors.toList());
 
         return new ResultDto(replies);
@@ -79,12 +71,7 @@ public class ReplyController {
 
         Reply reply = replyService.findById(id);
 
-        ReadReplyResponseDto replydto = new ReadReplyResponseDto(id,
-                reply.getDiary().getId(),
-                reply.getUser().getEmail(),
-                reply.isSecret(),
-                reply.getContent()
-        );
+        ReadReplyResponseDto replydto = new ReadReplyResponseDto(reply);
 
         return new ResultDto(replydto);
     }
@@ -112,7 +99,7 @@ public class ReplyController {
 
         private String diaryId;
 
-        private String email;
+        private String uid;
 
         private boolean secret;
 
@@ -142,11 +129,22 @@ public class ReplyController {
 
         private String diaryId;
 
-        private String email;
+        private String uid;
+
+        private String userName;
 
         private boolean secret;
 
         private String content;
+
+        public ReadReplyResponseDto(Reply reply) {
+            this.id = reply.getId();
+            this.diaryId = reply.getDiary().getId();
+            this.uid = reply.getUser().getUid();
+            this.userName = reply.getUser().getName();
+            this.secret = reply.isSecret();
+            this.content = reply.getContent();
+        }
 
     }
 

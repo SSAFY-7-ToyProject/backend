@@ -28,10 +28,17 @@ public class DiaryRepository {
                 .getResultList();
 
         return diaryList;
-
-
-
     }
+
+    public List<Diary> findByUserId(String uid) {
+
+        List<Diary> diaryList = em.createQuery("SELECT d from Diary d WHERE d.user.uid = :uid",Diary.class)
+                .setParameter("uid",uid)
+                .getResultList();
+
+        return diaryList;
+    }
+
     public Diary findById(String id){
 
         return em.find(Diary.class,id);
@@ -42,5 +49,6 @@ public class DiaryRepository {
 
         em.remove( findById(id) );
     }
+
 
 }

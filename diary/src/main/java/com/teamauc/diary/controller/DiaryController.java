@@ -7,11 +7,13 @@ import com.teamauc.diary.dto.MessageResponseDto;
 import com.teamauc.diary.dto.ResultDto;
 import com.teamauc.diary.service.DiaryService;
 import com.teamauc.diary.service.UserService;
+import com.teamauc.diary.util.SHA256;
 import lombok.*;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,11 +30,16 @@ public class DiaryController {
     @PostMapping
     public CreateDiaryResponseDto createDiary (@RequestBody CreateDiaryRequestDto request){
 
-        String diaryid = String.valueOf(LocalDateTime.now()); // 나중에 해시값으로 바꿀것
+        String diaryId = null; // 나중에 해시값으로 바꿀것
+        try {
+            diaryId = SHA256.encrypt(String.valueOf(LocalDateTime.now()));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
+        }
 
         Diary diary = Diary.createDiary(
-                diaryid,
-                userService.SearchUserByEmail(request.email),
+                diaryId,
+                userService.SearchUserById(request.uid),
                 request.getWeather(),
                 LocalDateTime.now(),
                 request.isSecret(),
@@ -44,12 +51,13 @@ public class DiaryController {
         return new CreateDiaryResponseDto(diary.getId());
     }
 
-    @GetMapping("/user/{email}")
-    public ResultDto readDiaryByEmail (@PathVariable ("email") String email){
+    @GetMapping("/user/{uid}")
+    public ResultDto readDiaryByEmail (@PathVariable ("uid") String uid){
 
-        List<ReadDiaryResponseDto> diaryList = diaryService.findByUserEmail(email).stream().map(diary -> new ReadDiaryResponseDto (
+        List<ReadDiaryResponseDto> diaryList = diaryService.findByUserId(uid).stream().map(diary -> new ReadDiaryResponseDto (
                 diary.getId(),
-                diary.getUser().getEmail(),
+                diary.getUser().getUid(),
+                diary.getUser().getName(),
                 diary.getRegTime(),
                 diary.getWeather(),
                 diary.isSecret(),
@@ -68,7 +76,8 @@ public class DiaryController {
 
         return new ResultDto(new ReadDiaryResponseDto(
                 diary.getId(),
-                diary.getUser().getEmail(),
+                diary.getUser().getUid(),
+                diary.getUser().getName(),
                 diary.getRegTime(),
                 diary.getWeather(),
                 diary.isSecret(),
@@ -100,7 +109,7 @@ public class DiaryController {
     @Data
     static class CreateDiaryRequestDto{
 
-        private String email;
+        private String uid;
 
         private Weather weather;
 
@@ -122,7 +131,9 @@ public class DiaryController {
     static class ReadDiaryResponseDto {
        private String id;
 
-       private String email;
+       private String uid;
+
+       private String userName;
 
        private LocalDateTime regTime;
 

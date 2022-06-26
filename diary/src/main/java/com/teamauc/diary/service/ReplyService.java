@@ -13,6 +13,7 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -26,6 +27,12 @@ public class ReplyService {
     public List<Reply> findByUserEmail (String email) {
 
         List <Reply> replies = replyRepository.findByUserEmail(email);
+
+        return replies;
+    }
+
+    public List<Reply> findByUserId(String uid) {
+        List <Reply> replies = replyRepository.findByUserId(uid);
 
         return replies;
     }
@@ -75,5 +82,6 @@ public class ReplyService {
         replyRepository.delete(id);
 
     }
+
 
 }

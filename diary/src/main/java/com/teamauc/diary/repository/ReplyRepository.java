@@ -29,6 +29,15 @@ public class ReplyRepository {
         return replies;
     }
 
+    public List<Reply> findByUserId(String uid) {
+
+        List<Reply> replies = em.createQuery("SELECT r FROM Reply r WHERE r.user.uid = :uid",Reply.class)
+                .setParameter("uid",uid)
+                .getResultList();
+
+        return replies;
+    }
+
     public List<Reply> findByDiaryId (String id) {
         List<Reply> replies = em.createQuery("SELECT r FROM Reply r WHERE r.diary.id = :diaryId",Reply.class)
                 .setParameter("diaryId",id)
@@ -48,7 +57,6 @@ public class ReplyRepository {
         em.remove(findById(id));
 
     }
-
 
 
 
