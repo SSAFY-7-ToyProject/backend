@@ -30,15 +30,7 @@ public class DiaryController {
     @PostMapping
     public CreateDiaryResponseDto createDiary (@RequestBody CreateDiaryRequestDto request){
 
-        String diaryId = null; // 나중에 해시값으로 바꿀것
-        try {
-            diaryId = SHA256.encrypt(String.valueOf(LocalDateTime.now()));
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException(e);
-        }
-
         Diary diary = Diary.createDiary(
-                diaryId,
                 userService.SearchUserById(request.uid),
                 request.getWeather(),
                 LocalDateTime.now(),

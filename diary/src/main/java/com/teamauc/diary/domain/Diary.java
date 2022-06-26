@@ -1,5 +1,6 @@
 package com.teamauc.diary.domain;
 
+import com.teamauc.diary.util.SHA256;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -7,6 +8,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +23,7 @@ public class Diary {
         @Setter (AccessLevel.NONE)
         private String id;
 
-        @JoinColumn (name = "user_email")
+        @JoinColumn (name = "user_uid")
         @ManyToOne (fetch= FetchType.LAZY)
         @Setter (AccessLevel.NONE)
         @NotNull (message = "존재하지 않는 사용자 입니다")
@@ -44,10 +46,17 @@ public class Diary {
 
         // 생성 메소드 //
 
-        public static Diary createDiary(String id, User user, Weather weather, LocalDateTime regTime, boolean secret, String title, String content){
+        public static Diary createDiary(User user, Weather weather, LocalDateTime regTime, boolean secret, String title, String content){
             Diary diary = new Diary();
 
-            diary.id = id;
+            String diaryId = null; // 나중에 해시값으로 바꿀것
+            try {
+                diaryId = SHA256.encrypt(user.getUid()+String.valueOf(LocalDateTime.now()));
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
+            }
+
+            diary.id = diaryId;
             diary.user = user;
             diary.regTime = regTime;
             diary.weather = weather;

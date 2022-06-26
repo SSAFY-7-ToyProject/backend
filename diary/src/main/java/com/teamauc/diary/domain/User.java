@@ -20,6 +20,7 @@ import java.util.List;
 public class User {
 
     @Id
+    @Column (name = "user_uid")
     @Setter (AccessLevel.NONE)
     private String uid;
 
