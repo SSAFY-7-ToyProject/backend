@@ -3,6 +3,7 @@ package com.teamauc.diary.controller;
 import com.teamauc.diary.domain.Birth;
 import com.teamauc.diary.domain.Gender;
 import com.teamauc.diary.domain.User;
+import com.teamauc.diary.dto.ResultDto;
 import com.teamauc.diary.service.UserService;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -35,11 +36,17 @@ public class UserController {
     }
 
     @GetMapping("/{uid}")
-    public ReadUserResponseDto readUser(@PathVariable ("uid") String uid) {
+    public ResultDto readUser(@PathVariable ("uid") String uid) {
 
         User user = userService.SearchUserById(uid);
 
-        return new ReadUserResponseDto(uid,user.getEmail(),user.getName(),user.getBirth(),user.getGender(),user.getPhoneNumber());
+        return new ResultDto(new ReadUserResponseDto(
+                uid,
+                user.getEmail(),
+                user.getName(),
+                new Birth(user.getBirth().getBirthYear(), user.getBirth().getBirthMonth(), user.getBirth().getBirthDay()),
+                user.getGender(),
+                user.getPhoneNumber()));
 
     }
 
@@ -73,6 +80,7 @@ public class UserController {
 
         @NotEmpty
         private String name;
+
 
         private Birth birth;
 
