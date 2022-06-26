@@ -1,7 +1,6 @@
 package com.teamauc.diary.repository;
 
 import com.teamauc.diary.domain.User;
-import com.teamauc.diary.exception.LoginException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -21,13 +20,18 @@ public class UserRepository { // ->필요한 기능이 무엇이 있을까? Crea
  }
 
 
+
  public User findByEmail (String email) {                   // 회원가입시 아이디 존재 or email찾기
 
      return em.find(User.class,email);
 
  }
 
+ public void delete (String email) {
 
+     em.remove(findByEmail(email));
+
+ }
 
 
 

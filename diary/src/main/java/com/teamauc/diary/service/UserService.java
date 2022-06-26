@@ -34,6 +34,12 @@ public class UserService {
         }
     }
 
+    public User SearchUserByEmail(String email) {
+
+        return userRepository.findByEmail(email);
+
+    }
+
     public boolean checkEmailDuplicated(String email){           //중복 테스트
         return userRepository.findByEmail(email) != null;
     }
@@ -44,13 +50,16 @@ public class UserService {
         User user = userRepository.findByEmail(email);
 
         if( user == null ){
-            throw new InvalidApproachException();
+            throw new InvalidApproachException("등록되지 않은 사용자입니다.");
         }
         else {
+
             user.setName(name);
             user.setBirth(birth);
             user.setGender(gender);
             user.setPhoneNumber(phonenumber);
+
+
         }
     }
 
@@ -60,6 +69,12 @@ public class UserService {
         userRepository.regist(user);
 
         return user.getEmail();
+    }
+
+    @Transactional
+    public void delete(String email) {
+
+        userRepository.delete(email);
     }
 
 

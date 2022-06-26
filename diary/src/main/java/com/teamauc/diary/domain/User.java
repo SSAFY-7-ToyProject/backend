@@ -1,5 +1,6 @@
 package com.teamauc.diary.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,6 +36,7 @@ public class User {
     private String phoneNumber;
 
     @OneToMany(mappedBy = "user") // Test 할 것 "" 안의 value가 의미하는 것?
+    @JsonIgnore
     private List<Diary> diaries = new ArrayList<>();
 
     @OneToMany(mappedBy = "user")
