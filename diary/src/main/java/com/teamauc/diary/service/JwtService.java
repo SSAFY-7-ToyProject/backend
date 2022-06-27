@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
+import com.teamauc.diary.domain.User;
 import com.teamauc.diary.exception.UnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,12 +28,13 @@ import org.springframework.stereotype.Service;
 public class JwtService {
 
     public static final Logger logger = LoggerFactory.getLogger(JwtService.class);
-    private static final String SALT = "teamauc";
+    private static final String SALT = "tEamAucfoCusonPoweRfulSecUritYsERviCe";
 
-    private static final int EXPIRE_SECONDS = 30 ;
+    private static final int EXPIRE_SECONDS = 1200 ;
 
     public <T> String create(String key, T data, String subject) {
-        String jwt = Jwts.builder().setHeaderParam("typ", "JWT").setHeaderParam("regDate", System.currentTimeMillis())
+
+        String jwt = Jwts.builder().setHeaderParam("type", "JWT").setHeaderParam("regDate", System.currentTimeMillis())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * EXPIRE_SECONDS)).setSubject(subject)
                 .claim(key, data).signWith(SignatureAlgorithm.HS256, this.generateKey()).compact();
         return jwt;
@@ -59,43 +61,41 @@ public class JwtService {
             Jws<Claims> claims = Jwts.parser().setSigningKey(this.generateKey()).parseClaimsJws(jwt);
             return true;
         } catch (Exception e) {
-//			if (logger.isInfoEnabled()) {
-//				e.printStackTrace();
-//			} else {
             logger.error(e.getMessage());
-//			}
-//			throw new UnauthorizedException();
-//			개발환경
             return false;
         }
     }
 
-    public Map<String, Object> get(String key) {
+    // 현재 사용자가 유효 한지 검사하는 메소드
+    public boolean isValidUser() {
+
+        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
+                .getRequest();
+        String jwt = request.getHeader("access-token");
+
+        return isUsable(jwt);
+    }
+
+    public Map<String, Object> getData() {
         HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
                 .getRequest();
         String jwt = request.getHeader("access-token");
         Jws<Claims> claims = null;
+
         try {
             claims = Jwts.parser().setSigningKey(SALT.getBytes("UTF-8")).parseClaimsJws(jwt);
         } catch (Exception e) {
-//			if (logger.isInfoEnabled()) {
-//				e.printStackTrace();
-//			} else {
             logger.error(e.getMessage());
-//			}
             throw new UnauthorizedException();
-//			개발환경
-//			Map<String,Object> testMap = new HashMap<>();
-//			testMap.put("userid", userid);
-//			return testMap;
         }
         Map<String, Object> value = claims.getBody();
         logger.info("value : {}", value);
         return value;
+
     }
 
     public String getUserId() {
-        return (String) this.get("user").get("userid");
+        return (String) this.getData().get("uid");
     }
 
 

@@ -33,6 +33,12 @@ public class DiaryService {
         return diaryList;
     }
 
+    public  List<Diary>  findOpenByUserId(String uid) {
+        List<Diary> diaryList = diaryRepository.findOpenByUserId(uid);
+
+        return diaryList;
+    }
+
     public Diary findByDiaryId (String id){
 
         Diary diary = diaryRepository.findById(id);

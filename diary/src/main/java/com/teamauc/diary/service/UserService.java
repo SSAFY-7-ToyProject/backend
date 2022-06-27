@@ -21,12 +21,12 @@ public class UserService {
     public User login(String email, String password) {
         User user = userRepository.findByEmail(email);
         if (user == null) {
-            throw new LoginException("이메일과 비밀번호를 확인해주세요");
+            throw new LoginException("이메일과 비밀번호를 확인해주세요1");
         }
         else {
-            if(password!=user.getPassword()){
+            if(!password.equals(user.getPassword())){
 
-                throw new LoginException("이메일과 비밀번호를 확인해주세요");
+                throw new LoginException("이메일과 비밀번호를 확인해주세요2");
             }
             else {
                 return user;

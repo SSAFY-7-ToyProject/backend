@@ -5,13 +5,18 @@ import com.teamauc.diary.domain.User;
 import com.teamauc.diary.domain.Weather;
 import com.teamauc.diary.dto.MessageResponseDto;
 import com.teamauc.diary.dto.ResultDto;
+import com.teamauc.diary.exception.InvalidApproachException;
+import com.teamauc.diary.exception.UnauthorizedException;
 import com.teamauc.diary.service.DiaryService;
+import com.teamauc.diary.service.JwtService;
 import com.teamauc.diary.service.UserService;
 import com.teamauc.diary.util.SHA256;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.*;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Email;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
@@ -19,19 +24,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/diary")
 public class DiaryController {
 
+    private final JwtService jwtService;
     private final DiaryService diaryService;
     private final UserService userService;
 
     @PostMapping
-    public CreateDiaryResponseDto createDiary (@RequestBody CreateDiaryRequestDto request){
+    public CreateDiaryResponseDto createDiary(@RequestBody CreateDiaryRequestDto request) {
+
+        if (!jwtService.isValidUser())
+            throw new InvalidApproachException("사용자 인증 실패");
 
         Diary diary = Diary.createDiary(
-                userService.SearchUserById(request.uid),
+                userService.SearchUserById(jwtService.getUserId()),
                 request.getWeather(),
                 LocalDateTime.now(),
                 request.isSecret(),
@@ -44,51 +54,80 @@ public class DiaryController {
     }
 
     @GetMapping("/user/{uid}")
-    public ResultDto readDiaryByEmail (@PathVariable ("uid") String uid){
+    public ResultDto readDiaryByEmail(@PathVariable("uid") String uid) {
 
-        List<ReadDiaryResponseDto> diaryList = diaryService.findByUserId(uid).stream().map(diary -> new ReadDiaryResponseDto (
-                diary.getId(),
-                diary.getUser().getUid(),
-                diary.getUser().getName(),
-                diary.getRegTime(),
-                diary.getWeather(),
-                diary.isSecret(),
-                diary.getTitle(),
-                diary.getContent()
-        )).collect(Collectors.toList());
+        if (!jwtService.isValidUser())
+            throw new InvalidApproachException("인증 실패");
+
+        String currentUid = jwtService.getUserId();
+
+        boolean isMine = currentUid.equals(uid);
+
+        List<ReadDiaryResponseDto> diaryList = new ArrayList<>();
+
+        if (isMine) {
+            diaryList = diaryService.findByUserId(uid).stream().map(diary -> new ReadDiaryResponseDto(diary)).collect(Collectors.toList());
+        } else {
+            diaryList = diaryService.findOpenByUserId(uid).stream().map(diary -> new ReadDiaryResponseDto(diary)).collect(Collectors.toList());
+        }
 
         return new ResultDto(diaryList);
 
     }
 
     @GetMapping("/{id}")
-    public ResultDto readDiaryById (@PathVariable ("id") String id){
+    public ResultDto readDiaryById(@PathVariable("id") String id) {
+
+        if (!jwtService.isValidUser())
+            throw new InvalidApproachException("사용자 인증 실패");
+
+        String currentUid = jwtService.getUserId();
 
         Diary diary = diaryService.findByDiaryId(id);
 
-        return new ResultDto(new ReadDiaryResponseDto(
-                diary.getId(),
-                diary.getUser().getUid(),
-                diary.getUser().getName(),
-                diary.getRegTime(),
-                diary.getWeather(),
-                diary.isSecret(),
-                diary.getTitle(),
-                diary.getContent()
-        ));
+        boolean isMine = currentUid.equals(diary.getUser().getUid());
+
+        if (!isMine&&diary.isSecret()) {
+            throw new UnauthorizedException();
+        }
+
+
+        return new ResultDto(new ReadDiaryResponseDto(diary));
 
     }
 
     @PutMapping("/{diaryId}")
-    public MessageResponseDto UpdateDiary (@PathVariable ("diaryId") String id, @RequestBody UpdateDiaryRequestDto request) {
+    public MessageResponseDto UpdateDiary(@PathVariable("diaryId") String id, @RequestBody UpdateDiaryRequestDto request) {
 
-        diaryService.update(id,request.getWeather(),request.isSecret(),request.getTitle(),request.getContent());
+        if (!jwtService.isValidUser())
+            throw new InvalidApproachException("사용자 인증 실패");
 
-        return new MessageResponseDto ("수정 완료");
+        String currentUid = jwtService.getUserId();
+
+        Diary diary = diaryService.findByDiaryId(id);
+
+        boolean isMine = currentUid.equals(diary.getUser().getUid());
+
+        if(!isMine) throw new UnauthorizedException("본인의 일기가 아닙니다.");
+
+        diaryService.update(id, request.getWeather(), request.isSecret(), request.getTitle(), request.getContent());
+
+        return new MessageResponseDto("수정 완료");
     }
 
     @DeleteMapping("{diaryId}")
-    public MessageResponseDto DeleteDiary (@PathVariable ("diaryId") String id) {
+    public MessageResponseDto DeleteDiary(@PathVariable("diaryId") String id) {
+
+        if (!jwtService.isValidUser())
+            throw new InvalidApproachException("사용자 인증 실패");
+
+        String currentUid = jwtService.getUserId();
+
+        Diary diary = diaryService.findByDiaryId(id);
+
+        boolean isMine = currentUid.equals(diary.getUser().getUid());
+
+        if(!isMine) throw new UnauthorizedException("본인의 일기가 아닙니다.");
 
         diaryService.delete(id);
 
@@ -97,9 +136,8 @@ public class DiaryController {
     }
 
 
-
     @Data
-    static class CreateDiaryRequestDto{
+    static class CreateDiaryRequestDto {
 
         private String uid;
 
@@ -115,40 +153,53 @@ public class DiaryController {
     @Data
     @AllArgsConstructor
     static class CreateDiaryResponseDto {
-       private String id;
+        private String id;
     }
 
-   @Data
-   @AllArgsConstructor
+    @Data
+    @AllArgsConstructor
     static class ReadDiaryResponseDto {
-       private String id;
+        private String id;
 
-       private String uid;
+        private String uid;
 
-       private String userName;
+        private String userName;
 
-       private LocalDateTime regTime;
+        private LocalDateTime regTime;
 
-       private Weather weather;
+        private Weather weather;
 
-       private boolean secret;
+        private boolean secret;
 
-       private String title;
+        private String title;
 
-       private String content;
-   }
+        private String content;
 
-   @Data
+        public ReadDiaryResponseDto(Diary diary) {
+
+            this.id = diary.getId();
+            this.uid = diary.getUser().getUid();
+            this.userName = diary.getUser().getName();
+            this.regTime = diary.getRegTime();
+            this.weather = diary.getWeather();
+            this.secret = diary.isSecret();
+            this.title = diary.getTitle();
+            this.content = diary.getContent();
+
+        }
+    }
+
+    @Data
     static class UpdateDiaryRequestDto {
 
-       private Weather weather;
+        private Weather weather;
 
-       private boolean secret;
+        private boolean secret;
 
-       private String title;
+        private String title;
 
-       private String content;
-   }
+        private String content;
+    }
 
 
 }

@@ -1,10 +1,16 @@
 package com.teamauc.diary.controller;
 
 import com.teamauc.diary.domain.Birth;
+import com.teamauc.diary.domain.Diary;
 import com.teamauc.diary.domain.Gender;
 import com.teamauc.diary.domain.User;
 import com.teamauc.diary.dto.ResultDto;
+import com.teamauc.diary.exception.InvalidApproachException;
+import com.teamauc.diary.exception.LoginException;
+import com.teamauc.diary.exception.UnauthorizedException;
+import com.teamauc.diary.service.JwtService;
 import com.teamauc.diary.service.UserService;
+import io.jsonwebtoken.Jwts;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.NumberFormat;
@@ -16,6 +22,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +31,7 @@ import javax.validation.constraints.Size;
 @Slf4j
 public class UserController {
 
+    private final JwtService  jwtService;
     private final UserService userService;
 
     @PostMapping
@@ -35,8 +44,37 @@ public class UserController {
         return new RegistUserResponseDto(uid);
     }
 
+    @PostMapping("/login")
+    public Map login(@RequestBody @Valid LoginRequestDto request) {
+
+        User user = userService.login(request.getEmail(), request.getPassword());
+
+        if (user == null) {
+            throw new LoginException ("로그인에서 심각한 오류가 발생했습니다. 재가입 요망");
+        }
+        String token = jwtService.create("uid",user.getUid(),"access-token");
+
+        Map map = new HashMap();
+        map.put("access-token",token);
+
+
+
+        return map;
+
+
+    }
+
     @GetMapping("/{uid}")
     public ResultDto readUser(@PathVariable ("uid") String uid) {
+
+        if (!jwtService.isValidUser())
+            throw new InvalidApproachException("사용자 인증 실패");
+
+        String currentUid = jwtService.getUserId();
+
+        boolean isMine = currentUid.equals(uid);
+
+        if(!isMine) throw new UnauthorizedException("남의 신상정보를 보려고 하지마세요.");
 
         User user = userService.SearchUserById(uid);
 
@@ -53,6 +91,17 @@ public class UserController {
     @PutMapping("/{uid}")
     public UpdateUserResponseDto updateUser(@PathVariable("uid")String uid, @RequestBody UpdateUserRequestDto request){
 
+        if (!jwtService.isValidUser())
+            throw new InvalidApproachException("사용자 인증 실패");
+
+        String currentUid = jwtService.getUserId();
+
+        boolean isMine = currentUid.equals(uid);
+
+        if(!isMine) throw new UnauthorizedException("남의 신상정보를 수정하려고 하지마세요.");
+
+        User user = userService.SearchUserById(uid);
+
         userService.update(uid,request.getName(),request.getBirth(),request.getGender(), request.getPhoneNumber());
 
         return new UpdateUserResponseDto(uid);
@@ -60,6 +109,17 @@ public class UserController {
 
     @DeleteMapping("/{uid}")
     public DeleteUserResponseDto deleteUser(@PathVariable("uid") String uid){
+
+        if (!jwtService.isValidUser())
+            throw new InvalidApproachException("사용자 인증 실패");
+
+        String currentUid = jwtService.getUserId();
+
+        boolean isMine = currentUid.equals(uid);
+
+        if(!isMine) throw new UnauthorizedException();
+
+        User user = userService.SearchUserById(uid);
 
         userService.delete(uid);
         return new DeleteUserResponseDto("회원 탈퇴가 완료되었습니다.");
@@ -125,6 +185,14 @@ public class UserController {
         private Gender gender;
         private String phoneNumber;
 
+    }
+
+    @Data
+    static class LoginRequestDto {
+        @NotEmpty
+        private String email;
+        @NotEmpty
+        private String password;
     }
 
     @Data

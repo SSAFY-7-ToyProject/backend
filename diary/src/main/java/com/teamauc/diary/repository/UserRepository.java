@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
@@ -23,7 +24,7 @@ public class UserRepository { // ->필요한 기능이 무엇이 있을까? Crea
 
  public User findByEmail (String email) {
 
-     return em.find(User.class,email);
+     return (User) em.createQuery("SELECT u FROM User u WHERE u.email = :email").setParameter("email",email).getSingleResult();
 
  }
 
