@@ -53,6 +53,12 @@ public class DiaryController {
         return new CreateDiaryResponseDto(diary.getId());
     }
 
+    @GetMapping("/list")
+    public ResultDto readAllDiary(){
+        List<ReadDiaryResponseDto> diaryList = diaryService.findAllDiaryOrderByRegTime().stream().map(diary -> new ReadDiaryResponseDto(diary)).collect(Collectors.toList());
+        return new ResultDto(diaryList);
+    }
+
     @GetMapping("/user/{uid}")
     public ResultDto readDiaryByEmail(@PathVariable("uid") String uid) {
 

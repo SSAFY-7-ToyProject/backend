@@ -19,6 +19,9 @@ public class DiaryService {
 
     private final DiaryRepository diaryRepository;
 
+    public List<Diary> findAllDiaryOrderByRegTime(){
+        return diaryRepository.findAllDiaryOrderByRegTime();
+    }
 
     public List<Diary> findByUserEmail (String email) {
 

@@ -10,7 +10,6 @@ import com.teamauc.diary.exception.LoginException;
 import com.teamauc.diary.exception.UnauthorizedException;
 import com.teamauc.diary.service.JwtService;
 import com.teamauc.diary.service.UserService;
-import io.jsonwebtoken.Jwts;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.NumberFormat;
@@ -58,10 +57,7 @@ public class UserController {
         map.put("access-token",token);
 
 
-
         return map;
-
-
     }
 
     @GetMapping("/{uid}")

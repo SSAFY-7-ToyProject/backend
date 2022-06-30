@@ -21,6 +21,10 @@ public class DiaryRepository {
 
     }
 
+    public List<Diary> findAllDiaryOrderByRegTime(){
+        return em.createQuery("SELECT d from Diary d ORDER BY d.regTime DESC", Diary.class).getResultList();
+    }
+
     public List<Diary> findByUserEmail(String email){
 
         List<Diary> diaryList = em.createQuery("SELECT d from Diary d WHERE d.user.email = :email",Diary.class)
