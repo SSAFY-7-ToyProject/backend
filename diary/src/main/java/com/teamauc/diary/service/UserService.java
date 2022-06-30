@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 
 @Service
 @Transactional(readOnly = true)
@@ -34,18 +36,18 @@ public class UserService {
         }
     }
 
-    public User SearchUserByEmail(String email) {
+    public User searchUserByEmail(String email) {
 
         return userRepository.findByEmail(email);
 
     }
 
-    public User SearchUserById(String uid) {
+    public User searchUserById(String uid) {
         return userRepository.findById(uid);
     }
 
-    public boolean checkEmailDuplicated(String email){           //중복 테스트
-        return userRepository.findByEmail(email) != null;
+    public List<User> searchAllUserByName(String word) {
+        return userRepository.searchUserByEmail(word);
     }
 
     @Transactional

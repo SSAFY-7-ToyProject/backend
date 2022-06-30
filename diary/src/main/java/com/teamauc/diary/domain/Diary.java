@@ -49,7 +49,7 @@ public class Diary {
         public static Diary createDiary(User user, Weather weather, LocalDateTime regTime, boolean secret, String title, String content){
             Diary diary = new Diary();
 
-            String diaryId = null; // 나중에 해시값으로 바꿀것
+            String diaryId = null;
             try {
                 diaryId = SHA256.encrypt(user.getUid()+String.valueOf(LocalDateTime.now()));
             } catch (NoSuchAlgorithmException e) {

@@ -41,7 +41,7 @@ public class DiaryController {
             throw new InvalidApproachException("사용자 인증 실패");
 
         Diary diary = Diary.createDiary(
-                userService.SearchUserById(jwtService.getUserId()),
+                userService.searchUserById(jwtService.getUserId()),
                 request.getWeather(),
                 LocalDateTime.now(),
                 request.isSecret(),

@@ -40,7 +40,7 @@ public class ReplyController {
 
         String currentUid = jwtService.getUserId();
         Diary diary = diaryService.findByDiaryId(request.getDiaryId());
-        User user = userService.SearchUserById(jwtService.getUserId());
+        User user = userService.searchUserById(jwtService.getUserId());
 
         boolean isMyDiary = currentUid.equals(diary.getUser().getUid());
 

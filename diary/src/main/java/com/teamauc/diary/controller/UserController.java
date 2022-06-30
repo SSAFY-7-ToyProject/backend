@@ -21,8 +21,11 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+import javax.xml.transform.Result;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,6 +36,7 @@ public class UserController {
     private final JwtService  jwtService;
     private final UserService userService;
 
+    // 회원 가입
     @PostMapping
     public RegistUserResponseDto registUser(@RequestBody @Valid RegistUserRequestDto request){
 
@@ -43,6 +47,16 @@ public class UserController {
         return new RegistUserResponseDto(uid);
     }
 
+    // 이메일 중복 확인
+    @GetMapping("/check-email")
+    public ResultDto checkEmailDuplicated(@RequestBody CheckEmailDuplicatedRequestDto request) {
+        User user = userService.searchUserByEmail(request.getEmail());
+        Map map = new HashMap();
+        map.put("duplicated", user!=null);
+        return new ResultDto(map);
+    }
+
+    // 로그인
     @PostMapping("/login")
     public Map login(@RequestBody @Valid LoginRequestDto request) {
 
@@ -56,10 +70,19 @@ public class UserController {
         Map map = new HashMap();
         map.put("access-token",token);
 
-
         return map;
     }
 
+    // 이메일로 사용자 검색
+    @GetMapping("/search")
+    public ResultDto searchUser(@RequestBody @Valid SearchUserRequestDto request) {
+
+        List<SearchUserResponseDto> searchedUser = userService.searchAllUserByName(request.word)
+                .stream().map(user-> new SearchUserResponseDto(user)).collect(Collectors.toList());
+        return new ResultDto(searchedUser);
+    }
+
+    // 사용자 정보 조회
     @GetMapping("/{uid}")
     public ResultDto readUser(@PathVariable ("uid") String uid) {
 
@@ -72,7 +95,7 @@ public class UserController {
 
         if(!isMine) throw new UnauthorizedException("남의 신상정보를 보려고 하지마세요.");
 
-        User user = userService.SearchUserById(uid);
+        User user = userService.searchUserById(uid);
 
         return new ResultDto(new ReadUserResponseDto(
                 uid,
@@ -84,6 +107,7 @@ public class UserController {
 
     }
 
+    // 사용자 정보 수정
     @PutMapping("/{uid}")
     public UpdateUserResponseDto updateUser(@PathVariable("uid")String uid, @RequestBody UpdateUserRequestDto request){
 
@@ -96,13 +120,14 @@ public class UserController {
 
         if(!isMine) throw new UnauthorizedException("남의 신상정보를 수정하려고 하지마세요.");
 
-        User user = userService.SearchUserById(uid);
+        User user = userService.searchUserById(uid);
 
         userService.update(uid,request.getName(),request.getBirth(),request.getGender(), request.getPhoneNumber());
 
         return new UpdateUserResponseDto(uid);
     }
 
+    // 회원 탈퇴
     @DeleteMapping("/{uid}")
     public DeleteUserResponseDto deleteUser(@PathVariable("uid") String uid){
 
@@ -115,7 +140,7 @@ public class UserController {
 
         if(!isMine) throw new UnauthorizedException();
 
-        User user = userService.SearchUserById(uid);
+        User user = userService.searchUserById(uid);
 
         userService.delete(uid);
         return new DeleteUserResponseDto("회원 탈퇴가 완료되었습니다.");
@@ -171,6 +196,30 @@ public class UserController {
 
         private String phoneNumber;
 
+    }
+
+    @Data
+    static class CheckEmailDuplicatedRequestDto {
+        private String email;
+    }
+
+    @Data
+    static class SearchUserRequestDto {
+        @NotEmpty
+        private String word;
+    }
+
+    @Data
+    static class SearchUserResponseDto {
+        private String uid;
+        private String name;
+        private Gender gender;
+
+        public SearchUserResponseDto(User user){
+            this.uid = user.getUid();
+            this.name = user.getName();
+            this.gender = user.getGender();
+        }
     }
 
     @Data

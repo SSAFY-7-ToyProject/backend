@@ -5,42 +5,47 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
 public class UserRepository { // ->필요한 기능이 무엇이 있을까? Create Read Update Delete
 
- private final EntityManager em;
+    private final EntityManager em;
 
- public String regist(User user){
+    public String regist(User user) {
 
-     em.persist(user);
+        em.persist(user);
 
-     return user.getUid();
- }
+        return user.getUid();
+    }
 
 
+    public User findByEmail(String email) {
+        try {
+            return (User) em.createQuery("SELECT u FROM User u WHERE u.email = :email").setParameter("email", email).getSingleResult();
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
- public User findByEmail (String email) {
+    public User findById(String uid) {
 
-     return (User) em.createQuery("SELECT u FROM User u WHERE u.email = :email").setParameter("email",email).getSingleResult();
-
- }
-
-    public User findById (String uid) {
-
-        return em.find(User.class,uid);
+        return em.find(User.class, uid);
 
     }
 
- public void delete (String uid) {
+    public List<User> searchUserByEmail(String word) {
+        List<User> seachedUser = em.createQuery("SELECT u FROM User u WHERE u.name like :word").setParameter("word",word+"%").getResultList();
+        return seachedUser;
+    }
 
-     em.remove(findById(uid));
+    public void delete(String uid) {
 
- }
+        em.remove(findById(uid));
 
-
+    }
 
 
 }
