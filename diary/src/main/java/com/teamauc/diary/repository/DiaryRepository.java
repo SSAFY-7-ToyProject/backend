@@ -22,7 +22,7 @@ public class DiaryRepository {
     }
 
     public List<Diary> findAllDiaryOrderByRegTime(){
-        return em.createQuery("SELECT d from Diary d ORDER BY d.regTime DESC", Diary.class).getResultList();
+        return em.createQuery("SELECT d from Diary d WHERE d.secret = false ORDER BY d.regTime DESC", Diary.class).getResultList();
     }
 
     public List<Diary> findByUserEmail(String email){
