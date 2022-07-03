@@ -17,7 +17,10 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.*;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -35,7 +38,7 @@ public class DiaryController {
     private final UserService userService;
 
     @PostMapping
-    public CreateDiaryResponseDto createDiary(@RequestBody CreateDiaryRequestDto request) {
+    public CreateDiaryResponseDto createDiary(@RequestBody @Valid CreateDiaryRequestDto request) {
 
         if (!jwtService.isValidUser())
             throw new InvalidApproachException("사용자 인증 실패");
@@ -45,6 +48,7 @@ public class DiaryController {
                 request.getWeather(),
                 LocalDateTime.now(),
                 request.isSecret(),
+                request.getBackgroundColor(),
                 request.getTitle(),
                 request.getContent());
 
@@ -103,7 +107,7 @@ public class DiaryController {
     }
 
     @PutMapping("/{diaryId}")
-    public MessageResponseDto UpdateDiary(@PathVariable("diaryId") String id, @RequestBody UpdateDiaryRequestDto request) {
+    public MessageResponseDto UpdateDiary(@PathVariable("diaryId") String id, @RequestBody @Valid UpdateDiaryRequestDto request) {
 
         if (!jwtService.isValidUser())
             throw new InvalidApproachException("사용자 인증 실패");
@@ -116,7 +120,7 @@ public class DiaryController {
 
         if(!isMine) throw new UnauthorizedException("본인의 일기가 아닙니다.");
 
-        diaryService.update(id, request.getWeather(), request.isSecret(), request.getTitle(), request.getContent());
+        diaryService.update(id, request.getWeather(), request.isSecret(), request.getBackgroundColor(), request.getTitle(), request.getContent());
 
         return new MessageResponseDto("수정 완료");
     }
@@ -145,14 +149,17 @@ public class DiaryController {
     @Data
     static class CreateDiaryRequestDto {
 
-        private String uid;
-
         private Weather weather;
 
         private boolean secret;
 
+        @NotEmpty
+        private String backgroundColor;
+
+        @NotEmpty
         private String title;
 
+        @NotEmpty
         private String content;
     }
 
@@ -177,6 +184,8 @@ public class DiaryController {
 
         private boolean secret;
 
+        private String backgroundColor;
+
         private String title;
 
         private String content;
@@ -189,6 +198,7 @@ public class DiaryController {
             this.regTime = diary.getRegTime();
             this.weather = diary.getWeather();
             this.secret = diary.isSecret();
+            this.backgroundColor = diary.getBackgroundColor();
             this.title = diary.getTitle();
             this.content = diary.getContent();
 
@@ -202,8 +212,13 @@ public class DiaryController {
 
         private boolean secret;
 
+        @NotEmpty
+        private String backgroundColor;
+
+        @NotEmpty
         private String title;
 
+        @NotEmpty
         private String content;
     }
 

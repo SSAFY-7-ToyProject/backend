@@ -37,6 +37,8 @@ public class Diary {
 
         private boolean secret;
 
+        private String backgroundColor;
+
         private String title;
 
         private String content;
@@ -46,7 +48,7 @@ public class Diary {
 
         // 생성 메소드 //
 
-        public static Diary createDiary(User user, Weather weather, LocalDateTime regTime, boolean secret, String title, String content){
+        public static Diary createDiary(User user, Weather weather, LocalDateTime regTime, boolean secret, String backgroundColor, String title, String content){
             Diary diary = new Diary();
 
             String diaryId = null;
@@ -61,6 +63,7 @@ public class Diary {
             diary.regTime = regTime;
             diary.weather = weather;
             diary.secret = secret;
+            diary.backgroundColor = backgroundColor;
             diary.title = title;
             diary.content = content;
 

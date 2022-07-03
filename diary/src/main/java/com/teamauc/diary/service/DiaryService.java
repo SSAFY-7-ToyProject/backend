@@ -50,7 +50,7 @@ public class DiaryService {
     }
 
      @Transactional
-     public String update(String id, Weather weather, boolean secret, String title, String content) {
+     public String update(String id, Weather weather, boolean secret, String backgroundColor, String title, String content) {
 
         Diary diary = diaryRepository.findById(id);
 
@@ -60,6 +60,7 @@ public class DiaryService {
         else{
             diary.setWeather(weather);
             diary.setSecret(secret);
+            diary.setBackgroundColor(backgroundColor);
             diary.setTitle(title);
             diary.setContent(content);
 
