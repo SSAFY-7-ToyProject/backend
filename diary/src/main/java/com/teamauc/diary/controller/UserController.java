@@ -4,6 +4,7 @@ import com.teamauc.diary.domain.Birth;
 import com.teamauc.diary.domain.Diary;
 import com.teamauc.diary.domain.Gender;
 import com.teamauc.diary.domain.User;
+import com.teamauc.diary.dto.MessageResponseDto;
 import com.teamauc.diary.dto.ResultDto;
 import com.teamauc.diary.exception.InvalidApproachException;
 import com.teamauc.diary.exception.LoginException;
@@ -38,13 +39,13 @@ public class UserController {
 
     // 회원 가입
     @PostMapping
-    public RegistUserResponseDto registUser(@RequestBody @Valid RegistUserRequestDto request){
+    public MessageResponseDto registUser(@RequestBody @Valid RegistUserRequestDto request){
 
         User user = User.createUser(request.email,request.password,request.name,request.birth,request.gender,request.phoneNumber);
 
-        String uid = userService.regist(user);
+        userService.regist(user);
 
-        return new RegistUserResponseDto(uid);
+        return new MessageResponseDto("회원가입 완료");
     }
 
     // 이메일 중복 확인
@@ -69,6 +70,7 @@ public class UserController {
 
         Map map = new HashMap();
         map.put("access-token",token);
+        map.put("uid",user.getUid());
 
         return map;
     }
@@ -173,12 +175,12 @@ public class UserController {
 
     }
 
-    @Data
-    @AllArgsConstructor
-    static class RegistUserResponseDto {
-
-        private String uid;
-    }
+//    @Data
+//    @AllArgsConstructor
+//    static class RegistUserResponseDto {
+//
+//        private String uid;
+//    }
 
     @Data
     @AllArgsConstructor
