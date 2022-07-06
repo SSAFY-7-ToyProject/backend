@@ -54,7 +54,7 @@ public class DiaryController {
 
         diaryService.regist(diary);
 
-        return new CreateDiaryResponseDto(diary.getId());
+        return new CreateDiaryResponseDto(diary.getId(),diary.getRegTime());
     }
 
     @GetMapping("/list")
@@ -167,6 +167,8 @@ public class DiaryController {
     @AllArgsConstructor
     static class CreateDiaryResponseDto {
         private String id;
+
+        private LocalDateTime regTime;
     }
 
     @Data
