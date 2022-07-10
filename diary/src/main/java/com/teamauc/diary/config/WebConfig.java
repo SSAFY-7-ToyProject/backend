@@ -11,9 +11,11 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
                 .allowedMethods("*")
-                .allowedOrigins("http://localhost:3000")
-                .allowedOrigins("http://localhost:8080")
-                .allowedOrigins("http://localhost:80")
+                .allowedOrigins("https://my-weather-diary.netlify.app/")
+                .allowedOrigins("http://my-weather-diary.netlify.app/");
+//                .allowedOrigins("http://localhost:3000")
+//                .allowedOrigins("http://localhost:8080")
+//                .allowedOrigins("http://localhost:80")
         ;
     }
 }
